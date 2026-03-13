@@ -356,7 +356,6 @@ textarea:focus{border-bottom-color:var(--accent);}
 .list-card-del:hover{color:var(--del);}
 .list-detail-view{display:none;}
 .list-detail-view.active{display:block;}
-#listsView.hidden{display:none;}
 .list-detail-topbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
 .list-back-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:4px 0;flex-shrink:0;transition:color 0.2s;}
 .list-back-btn:hover{color:var(--text);}
@@ -673,7 +672,7 @@ function switchSection(name){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.id==='nav-'+name));
   if(name==='diary'&&document.getElementById('dtab-month').classList.contains('active'))renderCal();
   if(name==='tracker')renderHabits();
-  if(name==='notes')renderNotesList();
+  if(name==='notes'){renderNotesList();renderLists();}
   persistSettings();
 }
 
@@ -1108,24 +1107,36 @@ function persistLists(){
   lSaveTimer=setTimeout(()=>cloudSet(CK_LISTS,JSON.stringify(lists)).catch(()=>{}),900);
 }
 function renderLists(){
+  // always make sure lists view is visible and detail is hidden when rendering list
+  if(!currentListId){
+    document.getElementById('listsView').style.display='block';
+    document.getElementById('listDetailView').style.display='none';
+  }
   const grid=document.getElementById('listsGrid');
   if(!lists.length){grid.innerHTML=`<div class="empty-lists"><h3>No lists yet</h3><p>tap + new list to create one</p></div>`;return;}
   grid.innerHTML=lists.map(l=>{
     const total=l.items.length,done=l.items.filter(i=>i.done).length;
-    return`<div class="list-card" onclick="openList('${l.id}')"><div class="list-card-info"><div class="list-card-name">${esc(l.name)}</div><div class="list-card-meta">${total?`${done}/${total} done`:'empty'}</div></div><button class="list-card-del" onclick="deleteList(event,'${l.id}')">×</button></div>`;
+    return`<div class="list-card" ontouchstart="event.preventDefault();openList('${l.id}')" onclick="openList('${l.id}')"><div class="list-card-info"><div class="list-card-name">${esc(l.name)}</div><div class="list-card-meta">${total?`${done}/${total} done`:'empty'}</div></div><button class="list-card-del" ontouchstart="event.stopPropagation();event.preventDefault();deleteList('${l.id}')" onclick="event.stopPropagation();deleteList('${l.id}')">×</button></div>`;
   }).join('');
 }
 function openList(id){
-  currentListId=id;const l=lists.find(l=>l.id===id);if(!l)return;
+  const l=lists.find(l=>l.id===id);if(!l)return;
+  currentListId=id;
   document.getElementById('listDetailName').value=l.name;
   document.getElementById('listsView').style.display='none';
   document.getElementById('listDetailView').style.display='block';
-  document.getElementById('todoInput').value='';renderTodos();
+  document.getElementById('todoInput').value='';
+  renderTodos();
   setTimeout(()=>document.getElementById('todoInput').focus(),80);
 }
-function closeListDetail(){currentListId=null;document.getElementById('listDetailView').style.display='none';document.getElementById('listsView').style.display='';renderLists();}
+function closeListDetail(){
+  currentListId=null;
+  document.getElementById('listDetailView').style.display='none';
+  document.getElementById('listsView').style.display='block';
+  renderLists();
+}
 function renameCurrentList(){const l=lists.find(l=>l.id===currentListId);if(!l)return;const v=document.getElementById('listDetailName').value.trim();if(v){l.name=v;persistLists();}}
-function deleteList(e,id){e.stopPropagation();if(!confirm('Delete this list?'))return;lists=lists.filter(l=>l.id!==id);persistLists();renderLists();}
+function deleteList(id){if(!confirm('Delete this list?'))return;lists=lists.filter(l=>l.id!==id);persistLists();renderLists();}
 function openNewListModal(){document.getElementById('newListName').value='';document.getElementById('newListModal').classList.add('show');setTimeout(()=>document.getElementById('newListName').focus(),200);}
 function closeModal(){document.getElementById('newListModal').classList.remove('show');}
 function closeModalOutside(e){if(e.target===document.getElementById('newListModal'))closeModal();}
@@ -1144,7 +1155,15 @@ function renderTodos(){
   if(done.length){html+=`<div class="todo-section-lbl">done · ${done.length}</div><div class="todo-list">`;done.forEach(t=>{html+=todoHTML(t);});html+=`</div><button class="todo-clear-btn" onclick="clearDone()">clear done</button>`;}
   container.innerHTML=html;
 }
-function todoHTML(t){return`<div class="todo-item ${t.done?'done':''}"><div class="todo-check" onclick="toggleTodo('${t.id}')"><div class="todo-check-inner"></div></div><div class="todo-text">${esc(t.text)}</div><button class="todo-del" onclick="deleteTodo('${t.id}')">×</button></div>`;}
+function todoHTML(t){
+  return`<div class="todo-item ${t.done?'done':''}">
+    <div class="todo-check" ontouchstart="event.preventDefault();toggleTodo('${t.id}')" onclick="toggleTodo('${t.id}')">
+      <div class="todo-check-inner"></div>
+    </div>
+    <div class="todo-text">${esc(t.text)}</div>
+    <button class="todo-del" ontouchstart="event.preventDefault();deleteTodo('${t.id}')" onclick="deleteTodo('${t.id}')">×</button>
+  </div>`;
+}
 document.getElementById('todoInput').addEventListener('keypress',e=>{if(e.key==='Enter')addTodo();});
 
 /* ════ UTILS ════ */
