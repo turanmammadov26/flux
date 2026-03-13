@@ -409,6 +409,37 @@ textarea:focus{border-bottom-color:var(--accent);}
 .modal-confirm-btn{width:100%;padding:13px;border:none;border-radius:12px;background:var(--accent);color:var(--btn-fg);font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:background var(--T);}
 .modal-confirm-btn:hover{background:var(--accent2);}
 
+/* ════ SETTINGS PANEL ════ */
+.settings-panel{
+  overflow:hidden;max-height:0;opacity:0;
+  transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s,background var(--T),border-color var(--T);
+}
+.settings-panel.open{max-height:320px;opacity:1;}
+.sett-group-label{padding:14px 20px 0;font-family:var(--font-mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);display:block;}
+.sett-rows{padding:12px 20px 18px;display:flex;flex-direction:column;gap:8px;}
+.sett-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;border-radius:12px;
+  background:var(--surface2);
+  transition:background var(--T);
+}
+.sett-row-name{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);margin-bottom:1px;}
+.sett-row-desc{font-family:var(--font-mono);font-size:10px;color:var(--text3);}
+.toggle{
+  width:44px;height:26px;border-radius:13px;
+  background:var(--border);border:none;cursor:pointer;
+  position:relative;flex-shrink:0;transition:background 0.25s;
+}
+.toggle.on{background:var(--accent);}
+.toggle::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:20px;height:20px;border-radius:50%;background:#fff;
+  transition:transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle.on::after{transform:translateX(18px);}
 @media(max-width:480px){
   .d-page,.n-section{padding:20px 16px;}
   #section-tracker{padding:0 10px 20px;}
@@ -439,6 +470,7 @@ textarea:focus{border-bottom-color:var(--accent);}
     <button class="theme-toggle-btn" onclick="toggleThemePanel()">
       <span class="t-dot"></span>theme
     </button>
+    <button class="theme-toggle-btn" onclick="toggleSettingsPanel()">settings</button>
   </div>
 </div>
 
@@ -594,6 +626,34 @@ textarea:focus{border-bottom-color:var(--accent);}
   </div>
 </div>
 
+<!-- ══════════ SETTINGS ══════════ -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="sett-group-label" style="margin-bottom:14px;">modules</div>
+  <div class="sett-rows">
+    <div class="sett-row">
+      <div class="sett-row-info">
+        <div class="sett-row-name">Diary</div>
+        <div class="sett-row-desc">daily rating & notes</div>
+      </div>
+      <button class="toggle on" id="tog-diary" onclick="toggleModule('diary')"></button>
+    </div>
+    <div class="sett-row">
+      <div class="sett-row-info">
+        <div class="sett-row-name">Habits</div>
+        <div class="sett-row-desc">habit tracker</div>
+      </div>
+      <button class="toggle on" id="tog-tracker" onclick="toggleModule('tracker')"></button>
+    </div>
+    <div class="sett-row">
+      <div class="sett-row-info">
+        <div class="sett-row-name">Notes & To-do</div>
+        <div class="sett-row-desc">notes and lists</div>
+      </div>
+      <button class="toggle on" id="tog-notes" onclick="toggleModule('notes')"></button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ BOTTOM NAV ══════════ -->
 <nav class="bottom-nav">
   <button class="nav-btn active" id="nav-diary"   onclick="switchSection('diary')">
@@ -680,15 +740,49 @@ function setTheme(t,save=true){
   applyDiaryColor(parseFloat(document.getElementById('ratingSlider').value));
 }
 
-/* ════ SECTION SWITCH ════ */
-function switchSection(name){
+/* ════ MODULES ════ */
+let modules = {diary:true, tracker:true, notes:true};
+
+function toggleSettingsPanel(){
+  document.getElementById('settingsPanel').classList.toggle('open');
+  closeThemePanel();
+}
+
+function applyModules(save=true){
+  const names=['diary','tracker','notes'];
+  // ensure at least one on
+  if(!names.some(n=>modules[n])) modules[names[0]]=true;
+
+  names.forEach(name=>{
+    const btn=document.getElementById('nav-'+name);
+    if(btn) btn.style.display=modules[name]?'':'none';
+    const tog=document.getElementById('tog-'+name);
+    if(tog) tog.classList.toggle('on',modules[name]);
+  });
+
+  // only switch section if current one got disabled — and stay silent (no save loop)
+  if(currentSection!=='settings' && !modules[currentSection]){
+    const first=names.find(n=>modules[n]);
+    if(first) switchSection(first,false);
+  }
+  if(save) persistSettings();
+}
+
+function toggleModule(name){
+  const wouldDisable=modules[name];
+  const othersOn=Object.entries(modules).some(([k,v])=>k!==name&&v);
+  if(wouldDisable && !othersOn) return; // can't disable last
+  modules[name]=!modules[name];
+  applyModules(true);
+}
+function switchSection(name, save=true){
   currentSection=name;
   document.querySelectorAll('.app-section').forEach(s=>s.classList.toggle('active',s.id==='section-'+name));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.id==='nav-'+name));
   if(name==='diary'&&document.getElementById('dtab-month').classList.contains('active'))renderCal();
   if(name==='tracker')renderHabits();
   if(name==='notes'){renderNotesList();renderLists();}
-  persistSettings();
+  if(save) persistSettings();
 }
 
 /* ════ SYNC UI ════ */
@@ -704,7 +798,7 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 /* ════ PERSIST SETTINGS ════ */
 function persistSettings(){
-  const s=JSON.stringify({theme:currentTheme,section:currentSection,subtitle:trackerSubtitle});
+  const s=JSON.stringify({theme:currentTheme,section:currentSection,subtitle:trackerSubtitle,modules});
   LS.set(CK_SETT,s);
   if(!isTG)return;
   clearTimeout(settTimer);
@@ -1195,7 +1289,7 @@ saveBtn.disabled=true;saveBtn.textContent='loading…';
   let settRaw=null;
   if(isTG){try{settRaw=await cloudGet(CK_SETT);}catch{}}
   if(!settRaw)settRaw=LS.get(CK_SETT);
-  if(settRaw){try{const s=JSON.parse(settRaw);if(s.theme)currentTheme=s.theme;if(s.subtitle)trackerSubtitle=s.subtitle;if(s.section)currentSection=s.section;}catch{}}
+  if(settRaw){try{const s=JSON.parse(settRaw);if(s.theme)currentTheme=s.theme;if(s.subtitle)trackerSubtitle=s.subtitle;if(s.section)currentSection=s.section;if(s.modules)modules=Object.assign(modules,s.modules);}catch{}}
 
   // habits
   let habitsRaw=null;
@@ -1223,6 +1317,7 @@ saveBtn.disabled=true;saveBtn.textContent='loading…';
   setTheme(currentTheme,false);
   applyDiaryColor(parseFloat(slider.value));
   updateSubtitleEl();
+  applyModules(false);
   switchSection(currentSection);
   renderHabits();
   renderNotesList();
