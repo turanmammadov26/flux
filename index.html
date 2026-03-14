@@ -437,14 +437,15 @@ textarea:focus{border-bottom-color:var(--accent);}
 .list-card-info{flex:1;min-width:0;}
 .list-card-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .list-card-meta{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.06em;}
-.list-card-del{background:none;border:none;color:var(--text3);font-size:17px;cursor:pointer;padding:4px;flex-shrink:0;opacity:0;transition:opacity 0.15s,color 0.15s;}
-.list-card:hover .list-card-del{opacity:1;}
+.list-card-del{background:none;border:none;color:var(--text3);font-size:17px;cursor:pointer;padding:4px;flex-shrink:0;transition:color 0.15s;touch-action:manipulation;}
 .list-card-del:hover{color:var(--del);}
 .list-detail-view{display:none;}
 .list-detail-view.active{display:block;}
 .list-detail-topbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
 .list-back-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:4px 0;flex-shrink:0;transition:color 0.2s;}
 .list-back-btn:hover{color:var(--text);}
+.list-delete-btn{background:none;border:1px solid var(--border);color:var(--del);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;margin-left:auto;flex-shrink:0;transition:background 0.18s;touch-action:manipulation;}
+.list-delete-btn:hover{background:var(--surface2);}
 .list-detail-name{flex:1;font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text);background:none;border:none;outline:none;-webkit-user-select:text;user-select:text;}
 .list-detail-name:focus{border-bottom:1px solid var(--accent);}
 .todo-add-row{display:flex;gap:8px;margin-bottom:20px;}
@@ -672,6 +673,7 @@ textarea:focus{border-bottom-color:var(--accent);}
           <button class="list-back-btn" onclick="closeListDetail()">&#8592; lists</button>
           <input class="list-detail-name" id="listDetailName" maxlength="40"
             onblur="renameCurrentList()" onkeypress="if(event.key==='Enter')this.blur()">
+          <button class="list-delete-btn" onclick="deleteCurrentList()">delete</button>
         </div>
         <div class="todo-add-row">
           <input type="text" class="todo-input" id="todoInput" placeholder="Add item&#8230;" maxlength="120">
@@ -1643,6 +1645,14 @@ function closeListDetail(){
   renderLists();
 }
 function renameCurrentList(){const l=lists.find(l=>l.id===currentListId);if(!l)return;const v=document.getElementById('listDetailName').value.trim();if(v){l.name=v;persistLists();}}
+function deleteCurrentList(){
+  if(!currentListId)return;
+  if(!confirm('Delete this list?'))return;
+  lists=lists.filter(l=>l.id!==currentListId);
+  persistLists();
+  closeListDetail();
+}
+
 function deleteList(id){if(!confirm('Delete this list?'))return;lists=lists.filter(l=>l.id!==id);persistLists();renderLists();}
 function openNewListModal(){document.getElementById('newListName').value='';document.getElementById('newListModal').classList.add('show');setTimeout(()=>document.getElementById('newListName').focus(),200);}
 function closeModal(){document.getElementById('newListModal').classList.remove('show');}
