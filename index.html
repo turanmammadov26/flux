@@ -293,44 +293,29 @@ textarea:focus{border-bottom-color:var(--accent);}
 
 /* notes list header */
 .notes-header{
-  display:flex;align-items:center;
+  display:flex;align-items:center;gap:0;
   border-bottom:1px solid var(--border);
   position:sticky;top:0;background:var(--bg);z-index:10;
-  transition:background var(--T),border-color var(--T);
   padding:0 20px;
+  transition:background var(--T),border-color var(--T);
 }
-.notes-filter-row{display:flex;align-items:center;flex:1;gap:0;}
-.notes-filter-wrap{display:flex;align-items:center;gap:6px;}
-/* main notes tab */
 .notes-tab{
-  padding:15px 0;
+  padding:15px 14px 15px 0;
   font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
   color:var(--muted);background:none;border:none;cursor:pointer;
   position:relative;transition:color var(--T);white-space:nowrap;
 }
-.notes-tab::after{content:'';position:absolute;bottom:-1px;left:0;width:100%;height:1px;background:var(--accent);transform:scaleX(0);transition:transform var(--T);}
-.notes-tab.active-notes{color:var(--text);}
-.notes-tab.active-notes::after{transform:scaleX(1);}
-/* archive pill — slides out next to notes */
-.notes-archive-pill{
-  background:none;border:none;cursor:pointer;
-  font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;
-  color:var(--text3);padding:4px 10px;border-radius:20px;
-  border:1px solid transparent;
-  white-space:nowrap;
-  max-width:0;overflow:hidden;opacity:0;
-  transition:max-width 0.3s ease,opacity 0.25s,color 0.18s,background 0.18s,border-color 0.18s,padding 0.3s;
-}
-.notes-archive-pill.visible{max-width:100px;opacity:1;padding:4px 10px;}
-.notes-archive-pill.active{background:var(--surface2);color:var(--accent);border-color:var(--accent);}
+.notes-tab::after{content:'';position:absolute;bottom:-1px;left:0;width:calc(100% - 14px);height:1px;background:var(--accent);transform:scaleX(0);transition:transform var(--T);}
+.notes-tab.active{color:var(--text);}
+.notes-tab.active::after{transform:scaleX(1);}
 .notes-new-btn{
   margin-left:auto;flex-shrink:0;
   background:var(--accent);color:var(--btn-fg);border:none;
   border-radius:8px;padding:6px 14px;
   font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;
-  cursor:pointer;transition:background var(--T);
+  cursor:pointer;transition:background var(--T),opacity 0.15s;
 }
-.notes-new-btn:hover{opacity:0.88;}
+.notes-new-btn:hover{opacity:0.85;}
 
 /* notes list */
 .notes-list{display:flex;flex-direction:column;gap:10px;}
@@ -408,6 +393,9 @@ textarea:focus{border-bottom-color:var(--accent);}
 .note-view-body em{font-style:italic;}
 .note-view-body s{opacity:0.4;text-decoration:line-through;}
 .note-view-body hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.md-ul,.md-ol{margin:4px 0 12px 0;padding-left:20px;color:var(--text2);}
+.md-ul li{list-style:disc;margin:3px 0;font-size:14px;line-height:1.7;}
+.md-ol li{list-style:decimal;margin:3px 0;font-size:14px;line-height:1.7;}
 
 /* edit mode */
 .note-edit-content{padding:20px 20px 40px;max-width:560px;margin:0 auto;}
@@ -632,11 +620,6 @@ textarea:focus{border-bottom-color:var(--accent);}
 
 <!-- ══════════ NOTES ══════════ -->
 <div class="app-section" id="section-notes">
-  <nav class="n-tabs">
-    <button class="n-tab active" data-ntab="notes" onclick="nTab('notes')">notes</button>
-    <button class="n-tab"        data-ntab="todo"  onclick="nTab('todo')">to-do</button>
-  </nav>
-
 
   <!-- notes -->
   <div class="n-section active" id="nsec-notes">
@@ -644,22 +627,41 @@ textarea:focus{border-bottom-color:var(--accent);}
     <!-- LIST VIEW -->
     <div id="notesListView">
       <div class="notes-header">
-        <div class="notes-filter-row">
-          <div class="notes-filter-wrap">
-            <button class="notes-tab active" id="notesViewActive" onclick="setNotesView('active')">notes</button>
-            <button class="notes-archive-pill" id="notesViewArchive" onclick="setNotesView('archive')">archive</button>
+        <button class="notes-tab active" id="notesViewActive"   onclick="setNotesView('active')">notes</button>
+        <button class="notes-tab"        id="notesViewArchive"  onclick="setNotesView('archive')">archive</button>
+        <button class="notes-tab"        id="notesViewTodo"     onclick="setNotesView('todo')">to-do</button>
+        <button class="notes-new-btn"    id="notesNewBtn"       onclick="openNewNote()">+ new</button>
+      </div>
+      <div id="notesNotesList">
+        <div class="n-section-pad" style="padding-top:14px;">
+          <div class="notes-search-wrap">
+            <input class="notes-search" id="notesSearch" type="text" placeholder="search…" oninput="renderNotesList()">
           </div>
+          <div class="notes-tags-wrap" id="notesTagsWrap"></div>
+          <div class="notes-list" id="notesList"></div>
         </div>
-        <button class="notes-new-btn" onclick="openNewNote()">+ new</button>
       </div>
-      <div class="n-section-pad" style="padding-top:14px;">
-        <div class="notes-search-wrap">
-          <input class="notes-search" id="notesSearch" type="text" placeholder="search…" oninput="renderNotesList()">
+      <div id="notesTodoSection" style="display:none;">
+        <div id="listsView" class="n-section-pad">
+          <div class="lists-topbar">
+            <span class="lists-title">my lists</span>
+            <button class="new-list-btn" onclick="openNewListModal()">+ new list</button>
+          </div>
+          <div class="lists-grid" id="listsGrid"></div>
         </div>
-        <div class="notes-tags-wrap" id="notesTagsWrap"></div>
-        <div class="notes-list" id="notesList"></div>
+        <div class="list-detail-view n-section-pad" id="listDetailView">
+          <div class="list-detail-topbar">
+            <button class="list-back-btn" onclick="closeListDetail()">&#8592; lists</button>
+            <input class="list-detail-name" id="listDetailName" maxlength="40"
+              onblur="renameCurrentList()" onkeypress="if(event.key==='Enter')this.blur()">
+          </div>
+          <div class="todo-add-row">
+            <input type="text" class="todo-input" id="todoInput" placeholder="Add item&#8230;" maxlength="120">
+            <button class="todo-add-btn" onclick="addTodo()">+ add</button>
+          </div>
+          <div id="todoContent"></div>
+        </div>
       </div>
-    </div>
 
     <!-- EDITOR (fullscreen layer) -->
     <div class="note-editor-page" id="editorView" style="display:none;">
@@ -700,9 +702,9 @@ textarea:focus{border-bottom-color:var(--accent);}
             <button class="fmt-btn" onclick="fmtHeading('## ')"    title="H1">H1</button>
             <button class="fmt-btn" onclick="fmtHeading('### ')"   title="H2">H2</button>
             <button class="fmt-btn" onclick="fmtLine('---')"       title="Divider">—</button>
-            <button class="fmt-btn" onclick="fmtTodo()"            title="Todo">☐</button>
+            <button class="fmt-btn" onclick="fmtTodo()"            title="Todo item">☐</button>
           </div>
-          <textarea class="note-body" id="noteBody" placeholder="Start writing…" oninput="updateCharCount()"></textarea>
+          <textarea class="note-body" id="noteBody" placeholder="Start writing…" oninput="updateCharCount()" onkeydown="handleNoteKeydown(event)"></textarea>
           <div class="char-ct-note" id="noteCharCount">0 chars</div>
         </div>
       </div>
@@ -710,28 +712,6 @@ textarea:focus{border-bottom-color:var(--accent);}
     </div>
   </div>
 
-  <!-- todo -->
-  <div class="n-section" id="nsec-todo">
-    <div id="listsView" class="n-section-pad">
-      <div class="lists-topbar">
-        <span class="lists-title">my lists</span>
-        <button class="new-list-btn" onclick="openNewListModal()">+ new list</button>
-      </div>
-      <div class="lists-grid" id="listsGrid"></div>
-    </div>
-    <div class="list-detail-view n-section-pad" id="listDetailView">
-      <div class="list-detail-topbar">
-        <button class="list-back-btn" onclick="closeListDetail()">← lists</button>
-        <input class="list-detail-name" id="listDetailName" maxlength="40"
-          onblur="renameCurrentList()" onkeypress="if(event.key==='Enter')this.blur()">
-      </div>
-      <div class="todo-add-row">
-        <input type="text" class="todo-input" id="todoInput" placeholder="Add item…" maxlength="120">
-        <button class="todo-add-btn" onclick="addTodo()">+ add</button>
-      </div>
-      <div id="todoContent"></div>
-    </div>
-  </div>
 </div>
 
 <!-- new list modal -->
@@ -933,7 +913,7 @@ function switchSection(name, save=true){
   if(gear) gear.style.color = name==='settings' ? 'var(--accent)' : '';
   if(name==='diary'&&document.getElementById('dtab-month').classList.contains('active'))renderCal();
   if(name==='tracker')renderHabits();
-  if(name==='notes'){renderNotesList();renderLists();}
+  if(name==='notes'){renderNotesList();}
   if(name==='settings') renderFontGrid();
   if(save) persistSettings();
 }
@@ -1213,33 +1193,51 @@ function renderMd(raw, noteId){
   const lines=raw.split('\n');
   const out=[];
   let buf=[];
-  const flushBuf=()=>{
-    if(!buf.length)return;
-    out.push('<p>'+buf.join('<br>')+'</p>');
-    buf=[];
-  };
+  let inUl=false, inOl=false;
+  const flushBuf=()=>{if(!buf.length)return;out.push('<p>'+buf.join('<br>')+'</p>');buf=[];};
+  const closeUl=()=>{if(inUl){out.push('</ul>');inUl=false;}};
+  const closeOl=()=>{if(inOl){out.push('</ol>');inOl=false;}};
+
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
-    if(line.startsWith('## ')){flushBuf();out.push(`<h2>${inl(line.slice(3))}</h2>`);continue;}
-    if(line.startsWith('### ')){flushBuf();out.push(`<h3>${inl(line.slice(4))}</h3>`);continue;}
-    if(line.match(/^-{3,}\s*$/)){flushBuf();out.push('<hr>');continue;}
-    // todo items
+    if(line.startsWith('## ')){flushBuf();closeUl();closeOl();out.push(`<h2>${inl(line.slice(3))}</h2>`);continue;}
+    if(line.startsWith('### ')){flushBuf();closeUl();closeOl();out.push(`<h3>${inl(line.slice(4))}</h3>`);continue;}
+    if(line.match(/^-{3,}\s*$/)){flushBuf();closeUl();closeOl();out.push('<hr>');continue;}
+
+    // todo checkbox
     const todoMatch=line.match(/^- \[([ x])\] (.*)$/);
     if(todoMatch){
-      flushBuf();
+      flushBuf();closeUl();closeOl();
       const done=todoMatch[1]==='x';
       const text=esc(todoMatch[2]);
       const nid=noteId||'';
-      out.push(`<div class="note-todo-item${done?' done':''}" onclick="toggleNoteTodo('${nid}',${i})">
-        <div class="note-todo-cb"></div>
-        <div class="note-todo-text">${text}</div>
-      </div>`);
+      out.push(`<div class="note-todo-item${done?' done':''}" onclick="toggleNoteTodo('${nid}',${i})"><div class="note-todo-cb"></div><div class="note-todo-text">${text}</div></div>`);
       continue;
     }
-    if(line.trim()===''){flushBuf();continue;}
+
+    // bullet list: - text or • text
+    const bulletMatch=line.match(/^[-•] (.+)$/);
+    if(bulletMatch){
+      flushBuf();closeOl();
+      if(!inUl){out.push('<ul class="md-ul">');inUl=true;}
+      out.push(`<li>${inl(bulletMatch[1])}</li>`);
+      continue;
+    }
+
+    // numbered list: 1. text
+    const numMatch=line.match(/^\d+\. (.+)$/);
+    if(numMatch){
+      flushBuf();closeUl();
+      if(!inOl){out.push('<ol class="md-ol">');inOl=true;}
+      out.push(`<li>${inl(numMatch[1])}</li>`);
+      continue;
+    }
+
+    if(line.trim()===''){flushBuf();closeUl();closeOl();continue;}
+    closeUl();closeOl();
     buf.push(inl(line));
   }
-  flushBuf();
+  flushBuf();closeUl();closeOl();
   return out.join('\n')||'<p class="no-note-text">No content</p>';
 }
 function inl(s){
@@ -1263,19 +1261,68 @@ function toggleNoteTodo(noteId, lineIndex){
   document.getElementById('noteViewBody').innerHTML=renderMd(n.body,noteId);
 }
 
-function fmtTodo(){
-  const ta=document.getElementById('noteBody');
-  const start=ta.selectionStart,end=ta.selectionEnd;
+function handleNoteKeydown(e){
+  if(e.key!=='Enter') return;
+  const ta=e.target;
+  const pos=ta.selectionStart;
   const val=ta.value;
-  const lineStart=val.lastIndexOf('\n',start-1)+1;
-  const prefix='- [ ] ';
-  const line=val.slice(lineStart,end);
-  // wrap each selected line
-  const wrapped=line.split('\n').map(l=>l.startsWith('- [ ] ')||l.startsWith('- [x] ')?l:prefix+l).join('\n');
-  ta.value=val.slice(0,lineStart)+wrapped+val.slice(end);
-  ta.selectionStart=lineStart;
-  ta.selectionEnd=lineStart+wrapped.length;
-  ta.focus();
+  const lineStart=val.lastIndexOf('\n',pos-1)+1;
+  const line=val.slice(lineStart,pos);
+
+  // - [ ] todo list
+  const todoMatch=line.match(/^(\s*- \[[ x]\] )(.*)/);
+  if(todoMatch){
+    e.preventDefault();
+    const prefix=todoMatch[1].replace(/\[x\]/,'[ ]'); // new item always unchecked
+    const text=todoMatch[2];
+    if(!text.trim()){
+      // empty item — exit list
+      ta.setRangeText('',lineStart,pos,'end');
+      const nl='\n';
+      ta.setRangeText(nl,lineStart,lineStart,'end');
+      ta.selectionStart=ta.selectionEnd=lineStart+1;
+    } else {
+      const insert='\n'+prefix.replace(/\[x\]/,'[ ]');
+      ta.setRangeText(insert,pos,pos,'end');
+      ta.selectionStart=ta.selectionEnd=pos+insert.length;
+    }
+    updateCharCount();return;
+  }
+
+  // - bullet list
+  const bulletMatch=line.match(/^(\s*[-•] )(.*)/);
+  if(bulletMatch){
+    e.preventDefault();
+    const text=bulletMatch[2];
+    if(!text.trim()){
+      ta.setRangeText('',lineStart,pos,'end');
+      ta.setRangeText('\n',lineStart,lineStart,'end');
+      ta.selectionStart=ta.selectionEnd=lineStart+1;
+    } else {
+      const insert='\n'+bulletMatch[1];
+      ta.setRangeText(insert,pos,pos,'end');
+      ta.selectionStart=ta.selectionEnd=pos+insert.length;
+    }
+    updateCharCount();return;
+  }
+
+  // 1. numbered list
+  const numMatch=line.match(/^(\s*)(\d+)\. (.*)/);
+  if(numMatch){
+    e.preventDefault();
+    const text=numMatch[3];
+    if(!text.trim()){
+      ta.setRangeText('',lineStart,pos,'end');
+      ta.setRangeText('\n',lineStart,lineStart,'end');
+      ta.selectionStart=ta.selectionEnd=lineStart+1;
+    } else {
+      const nextNum=parseInt(numMatch[2])+1;
+      const insert='\n'+numMatch[1]+nextNum+'. ';
+      ta.setRangeText(insert,pos,pos,'end');
+      ta.selectionStart=ta.selectionEnd=pos+insert.length;
+    }
+    updateCharCount();return;
+  }
 }
 function nTab(name){
   document.querySelectorAll('.n-tab').forEach(t=>t.classList.toggle('active',t.dataset.ntab===name));
@@ -1288,28 +1335,20 @@ let notesView='active', activeTag='';
 
 function setNotesView(v){
   notesView=v;
-  const mainBtn=document.getElementById('notesViewActive');
-  const pill=document.getElementById('notesViewArchive');
-  // main tab highlight
-  mainBtn.classList.toggle('active-notes', v==='active');
-  // pill: visible when on notes view, active when on archive
-  pill.classList.toggle('visible', true); // always visible once clicked
-  pill.classList.toggle('active', v==='archive');
-  activeTag='';
-  renderNotesList();
+  // update tab highlights
+  ['active','archive','todo'].forEach(id=>{
+    const btn=document.getElementById('notesView'+id.charAt(0).toUpperCase()+id.slice(1));
+    if(btn) btn.classList.toggle('active', id===v);
+  });
+  // show/hide new button (not relevant for todo which has its own add)
+  const newBtn=document.getElementById('notesNewBtn');
+  if(newBtn) newBtn.style.display=v==='todo'?'none':'';
+  // show correct content
+  document.getElementById('notesNotesList').style.display=v==='todo'?'none':'block';
+  document.getElementById('notesTodoSection').style.display=v==='todo'?'block':'none';
+  if(v==='todo') renderLists();
+  else { activeTag=''; renderNotesList(); }
 }
-
-// show archive pill on hover/first interaction
-document.addEventListener('DOMContentLoaded',()=>{
-  const mainBtn=document.getElementById('notesViewActive');
-  if(mainBtn){
-    mainBtn.classList.add('active-notes');
-    // show pill on hover of notes tab area
-    mainBtn.addEventListener('mouseenter',()=>{
-      document.getElementById('notesViewArchive')?.classList.add('visible');
-    });
-  }
-});
 
 function renderNotesTags(filtered){
   const wrap=document.getElementById('notesTagsWrap');
@@ -1489,6 +1528,15 @@ function fmtHeading(prefix){
   ta.focus();updateCharCount();
 }
 function fmtLine(str){const ta=document.getElementById('noteBody'),pos=ta.selectionStart;ta.setRangeText('\n'+str+'\n',pos,pos,'end');ta.focus();updateCharCount();}
+function fmtTodo(){
+  const ta=document.getElementById('noteBody');
+  const pos=ta.selectionStart,val=ta.value;
+  const lineStart=val.lastIndexOf('\n',pos-1)+1;
+  const insert='- [ ] ';
+  ta.setRangeText('\n'+insert,pos,pos,'end');
+  ta.selectionStart=ta.selectionEnd=pos+1+insert.length;
+  ta.focus();updateCharCount();
+}
 
 /* ════════════════
    LISTS / TODO
