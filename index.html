@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Folio</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&family=Space+Mono&family=Syne:wght@400;600&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -39,7 +39,7 @@ body{
   transition:background var(--T),color var(--T);
   position:relative;padding-bottom:70px;
 }
-input,textarea,.subtitle{-webkit-user-select:text;user-select:text;}
+input,textarea{-webkit-user-select:text;user-select:text;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 50% 0%,var(--glow),transparent 65%);pointer-events:none;z-index:0;transition:background var(--T);}
 [data-theme="nothing"]::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:20px 20px;pointer-events:none;z-index:0;}
 
@@ -79,7 +79,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   padding:12px 20px 0;position:relative;z-index:50;
 }
 #storageIndicator{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;opacity:0.45;}
-.theme-row{display:flex;align-items:center;gap:8px;}
+.theme-row{display:flex;align-items:center;gap:6px;}
 .theme-toggle-btn{
   background:none;border:1px solid var(--border);border-radius:8px;
   color:var(--text2);font-family:var(--font-mono);font-size:9px;
@@ -93,13 +93,30 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   width:7px;height:7px;border-radius:50%;
   background:var(--accent);flex-shrink:0;transition:background var(--T);
 }
+.gear-btn{
+  background:none;border:1px solid var(--border);border-radius:8px;
+  color:var(--text3);font-size:14px;
+  width:32px;height:32px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.2s,color 0.2s,border-color 0.2s;
+}
+.gear-btn:hover{background:var(--surface2);color:var(--text);}
 .theme-dots{
-  display:flex;align-items:center;gap:4px;
+  /* collapsed: zero width, expands on open */
   max-width:0;overflow:hidden;
   transition:max-width 0.4s cubic-bezier(0.4,0,0.2,1),opacity 0.3s;
   opacity:0;
 }
-.theme-dots.open{max-width:400px;opacity:1;}
+.theme-dots.open{max-width:220px;opacity:1;}
+.theme-dots-inner{
+  display:flex;align-items:center;gap:2px;
+  overflow-x:auto;overflow-y:hidden;
+  max-width:220px;
+  padding-bottom:2px;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.theme-dots-inner::-webkit-scrollbar{display:none;}
 .th-btn{
   background:none;border:none;cursor:pointer;flex-shrink:0;
   font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
@@ -187,14 +204,25 @@ textarea:focus{border-bottom-color:var(--accent);}
 ════════════════════════ */
 #section-tracker{max-width:720px;margin:0 auto;padding:0 16px 20px;}
 /* tracker controls */
-.subtitle{font-family:var(--font-display);font-style:italic;font-size:0.95em;color:var(--text2);text-align:center;cursor:pointer;padding:5px 14px;border-radius:8px;margin-bottom:14px;display:block;transition:background 0.2s,color 0.2s;}
-.subtitle:hover{background:var(--surface2);color:var(--text);}
-.subtitle-input{font-family:var(--font-display);font-style:italic;font-size:0.95em;color:var(--text);text-align:center;background:var(--surface);border:1.5px solid var(--accent);border-radius:8px;padding:5px 16px;width:100%;max-width:340px;display:block;margin:0 auto 14px;}
-.subtitle-input:focus{outline:none;}
-.view-tabs{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px;margin-bottom:16px;transition:background var(--T);}
-.tab-btn{flex:1;padding:9px;border:none;border-radius:10px;background:transparent;color:var(--text2);font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;transition:background 0.2s,color 0.2s,box-shadow 0.2s;}
+#section-tracker{max-width:720px;margin:0 auto;padding:0 0 20px;}
+.tracker-top{padding:32px 24px 20px;}
+.tracker-note-wrap{margin-top:4px;}
+.tracker-note{
+  width:100%;background:transparent;border:none;
+  border-bottom:1px solid var(--border);
+  color:var(--text);font-family:var(--font-mono);font-size:13px;
+  font-weight:300;line-height:1.8;padding:4px 0 10px;
+  resize:none;outline:none;min-height:42px;max-height:120px;
+  caret-color:var(--accent);
+  transition:border-color var(--T),color var(--T);
+  overflow-y:hidden;
+}
+.tracker-note::placeholder{color:var(--muted);font-style:italic;}
+.tab-btn{flex:1;padding:15px 0;font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;transition:color var(--T);position:relative;}
+.tab-btn::after{content:'';position:absolute;bottom:-1px;left:25%;width:50%;height:1px;background:var(--accent);transform:scaleX(0);transition:transform var(--T),background var(--T);}
 .tab-btn:hover{color:var(--text);}
-.tab-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,0.1);}
+.tab-btn.active{color:var(--text);}
+.tab-btn.active::after{transform:scaleX(1);}
 .add-row{display:flex;gap:8px;margin-bottom:18px;}
 .add-row input{flex:1;padding:11px 15px;border:1.5px solid var(--border);border-radius:11px;background:var(--surface);color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color 0.2s;}
 .add-row input::placeholder{color:var(--text3);}
@@ -272,7 +300,23 @@ textarea:focus{border-bottom-color:var(--accent);}
 /* editor + view */
 .editor-view{display:none;}
 .editor-view.active{display:block;}
-#notesListView.hidden{display:none;}
+.notes-list-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.notes-view-btn{background:none;border:none;cursor:pointer;font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);padding:4px 0;position:relative;transition:color 0.18s;}
+.notes-view-btn::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:1px;background:var(--accent);transform:scaleX(0);transition:transform 0.2s;}
+.notes-view-btn.active{color:var(--text);}
+.notes-view-btn.active::after{transform:scaleX(1);}
+.notes-view-btn:last-of-type{margin-right:auto;}
+/* inline todo in rendered notes */
+.note-todo-item{display:flex;align-items:flex-start;gap:10px;margin:4px 0;cursor:pointer;}
+.note-todo-cb{
+  width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);
+  flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;
+  transition:background 0.18s,border-color 0.18s;
+}
+.note-todo-item.done .note-todo-cb{background:var(--accent);border-color:var(--accent);}
+.note-todo-item.done .note-todo-cb::after{content:'✓';font-size:11px;color:#fff;line-height:1;}
+.note-todo-item.done .note-todo-text{color:var(--muted);text-decoration:line-through;}
+.note-todo-text{font-size:14px;color:var(--text);line-height:1.6;}
 
 .note-topbar{
   display:flex;align-items:center;gap:10px;
@@ -409,24 +453,36 @@ textarea:focus{border-bottom-color:var(--accent);}
 .modal-confirm-btn{width:100%;padding:13px;border:none;border-radius:12px;background:var(--accent);color:var(--btn-fg);font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:background var(--T);}
 .modal-confirm-btn:hover{background:var(--accent2);}
 
-/* ════ SETTINGS PANEL ════ */
-.settings-panel{
-  overflow:hidden;max-height:0;opacity:0;
-  transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s;
-  background:var(--surface);border-bottom:1px solid var(--border);
-  transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s,background var(--T),border-color var(--T);
-}
-.settings-panel.open{max-height:320px;opacity:1;}
-.sett-group-label{padding:14px 20px 0;font-family:var(--font-mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);display:block;}
-.sett-rows{padding:12px 20px 18px;display:flex;flex-direction:column;gap:8px;}
+/* ════ SETTINGS PAGE ════ */
+#section-settings{overflow-y:auto;}
+.sett-page{max-width:480px;margin:0 auto;padding:24px 20px 40px;}
+.sett-header{margin-bottom:28px;}
+.sett-title{font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.sett-sub{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;color:var(--text3);}
+.sett-block{margin-bottom:28px;}
+.sett-block-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
 .sett-row{
   display:flex;align-items:center;justify-content:space-between;
-  padding:11px 14px;border-radius:12px;
-  background:var(--surface2);
-  transition:background var(--T);
+  padding:13px 15px;border-radius:13px;
+  background:var(--surface);border:1px solid var(--border);
+  margin-bottom:7px;
+  transition:background var(--T),border-color var(--T);
 }
-.sett-row-name{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);margin-bottom:1px;}
+.sett-row-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px;}
 .sett-row-desc{font-family:var(--font-mono);font-size:10px;color:var(--text3);}
+.sett-hint{font-family:var(--font-mono);font-size:9px;color:var(--text3);padding:6px 4px;letter-spacing:0.06em;}
+/* font grid */
+.font-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.font-card{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:13px;padding:14px 15px;cursor:pointer;
+  transition:border-color 0.2s,background var(--T);
+}
+.font-card:hover{border-color:var(--accent);}
+.font-card.active{border-color:var(--accent);background:var(--surface2);}
+.font-card-name{font-size:18px;color:var(--text);margin-bottom:4px;line-height:1.2;}
+.font-card-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);}
+/* toggle */
 .toggle{
   width:44px;height:26px;border-radius:13px;
   background:var(--border);border:none;cursor:pointer;
@@ -457,20 +513,22 @@ textarea:focus{border-bottom-color:var(--accent);}
   <span id="storageIndicator"></span>
   <div class="theme-row">
     <div class="theme-dots" id="themeDots">
-      <button class="th-btn active" data-theme="default"  onclick="setTheme('default')">ivory</button>
-      <button class="th-btn"        data-theme="ash"       onclick="setTheme('ash')">ash</button>
-      <button class="th-btn"        data-theme="sage"      onclick="setTheme('sage')">sage</button>
-      <button class="th-btn"        data-theme="midnight"  onclick="setTheme('midnight')">midnight</button>
-      <button class="th-btn"        data-theme="dusk"      onclick="setTheme('dusk')">dusk</button>
-      <button class="th-btn"        data-theme="bw"        onclick="setTheme('bw')">bw</button>
-      <button class="th-btn"        data-theme="indigo"    onclick="setTheme('indigo')">indigo</button>
-      <button class="th-btn"        data-theme="cyber"     onclick="setTheme('cyber')">cyber</button>
-      <button class="th-btn"        data-theme="nothing"   onclick="setTheme('nothing')">nothing</button>
+      <div class="theme-dots-inner">
+        <button class="th-btn active" data-theme="default"  onclick="setTheme('default')">ivory</button>
+        <button class="th-btn"        data-theme="ash"       onclick="setTheme('ash')">ash</button>
+        <button class="th-btn"        data-theme="sage"      onclick="setTheme('sage')">sage</button>
+        <button class="th-btn"        data-theme="midnight"  onclick="setTheme('midnight')">midnight</button>
+        <button class="th-btn"        data-theme="dusk"      onclick="setTheme('dusk')">dusk</button>
+        <button class="th-btn"        data-theme="bw"        onclick="setTheme('bw')">bw</button>
+        <button class="th-btn"        data-theme="indigo"    onclick="setTheme('indigo')">indigo</button>
+        <button class="th-btn"        data-theme="cyber"     onclick="setTheme('cyber')">cyber</button>
+        <button class="th-btn"        data-theme="nothing"   onclick="setTheme('nothing')">nothing</button>
+      </div>
     </div>
     <button class="theme-toggle-btn" onclick="toggleThemePanel()">
       <span class="t-dot"></span>theme
     </button>
-    <button class="theme-toggle-btn" onclick="toggleSettingsPanel()">settings</button>
+    <button class="gear-btn" onclick="switchSection('settings')" title="settings">⚙</button>
   </div>
 </div>
 
@@ -522,12 +580,18 @@ textarea:focus{border-bottom-color:var(--accent);}
 
 <!-- ══════════ TRACKER ══════════ -->
 <div class="app-section" id="section-tracker">
-  <div style="text-align:center;padding-top:16px;">
-    <div class="subtitle" id="subtitle" onclick="editSubtitle()">Just Do It</div>
-  </div>
-  <div class="view-tabs">
+  <nav class="d-tabs">
     <button class="tab-btn active" id="activeTab"  onclick="showActive()">active</button>
     <button class="tab-btn"        id="archiveTab" onclick="showArchived()">archive</button>
+  </nav>
+  <div class="tracker-top">
+    <div class="hdr">
+      <div class="hdr-date" id="trackerDateDisplay">—</div>
+      <h1 class="hdr-title">my <strong>habits</strong></h1>
+    </div>
+    <div class="tracker-note-wrap">
+      <textarea id="trackerNote" class="tracker-note" maxlength="200" placeholder="// leave a note for yourself…"></textarea>
+    </div>
   </div>
   <div class="add-row">
     <input type="text" id="habitInput" placeholder="New habit…" maxlength="50">
@@ -546,7 +610,11 @@ textarea:focus{border-bottom-color:var(--accent);}
   <!-- notes -->
   <div class="n-section active" id="nsec-notes">
     <div id="notesListView" class="n-section-pad">
-      <button class="new-note-btn" onclick="openNewNote()">+ new note</button>
+      <div class="notes-list-header">
+        <button class="notes-view-btn active" id="notesViewActive" onclick="setNotesView('active')">notes</button>
+        <button class="notes-view-btn"        id="notesViewArchive" onclick="setNotesView('archive')">archive</button>
+        <button class="new-note-btn" onclick="openNewNote()">+ new</button>
+      </div>
       <div class="notes-list" id="notesList"></div>
     </div>
     <div class="editor-view" id="editorView">
@@ -557,6 +625,7 @@ textarea:focus{border-bottom-color:var(--accent);}
           <button class="back-btn" onclick="closeEditor()">← back</button>
           <div class="note-topbar-actions">
             <button class="del-note-btn" onclick="deleteCurrentNote()">delete</button>
+            <button class="del-note-btn" id="archiveNoteBtn" onclick="archiveCurrentNote()">archive</button>
             <button class="save-note-btn" onclick="enterEditMode()">edit</button>
           </div>
         </div>
@@ -583,6 +652,7 @@ textarea:focus{border-bottom-color:var(--accent);}
             <button class="fmt-btn" onclick="fmtHeading('## ')"    title="H1">H1</button>
             <button class="fmt-btn" onclick="fmtHeading('### ')"   title="H2">H2</button>
             <button class="fmt-btn" onclick="fmtLine('---')"       title="Divider">—</button>
+            <button class="fmt-btn" onclick="fmtTodo()"            title="Todo">☐</button>
           </div>
           <textarea class="note-body" id="noteBody" placeholder="Start writing…" oninput="updateCharCount()"></textarea>
           <div class="char-ct-note" id="noteCharCount">0 chars</div>
@@ -627,42 +697,46 @@ textarea:focus{border-bottom-color:var(--accent);}
 </div>
 
 <!-- ══════════ SETTINGS ══════════ -->
-<div class="settings-panel" id="settingsPanel">
-  <div class="sett-group-label" style="margin-bottom:14px;">modules</div>
-  <div class="sett-rows">
-    <div class="sett-row">
-      <div class="sett-row-info">
-        <div class="sett-row-name">Diary</div>
-        <div class="sett-row-desc">daily rating & notes</div>
-      </div>
-      <button class="toggle on" id="tog-diary" onclick="toggleModule('diary')"></button>
+<div class="app-section" id="section-settings">
+  <div class="sett-page">
+    <div class="sett-header">
+      <div class="sett-title">settings</div>
+      <div class="sett-sub">customize your folio</div>
     </div>
-    <div class="sett-row">
-      <div class="sett-row-info">
-        <div class="sett-row-name">Habits</div>
-        <div class="sett-row-desc">habit tracker</div>
+
+    <div class="sett-block">
+      <div class="sett-block-label">modules</div>
+      <div class="sett-row">
+        <div><div class="sett-row-name">Diary</div><div class="sett-row-desc">daily rating & notes</div></div>
+        <button class="toggle on" id="tog-diary" onclick="toggleModule('diary')"></button>
       </div>
-      <button class="toggle on" id="tog-tracker" onclick="toggleModule('tracker')"></button>
+      <div class="sett-row">
+        <div><div class="sett-row-name">Habits</div><div class="sett-row-desc">habit tracker</div></div>
+        <button class="toggle on" id="tog-tracker" onclick="toggleModule('tracker')"></button>
+      </div>
+      <div class="sett-row">
+        <div><div class="sett-row-name">Notes & To-do</div><div class="sett-row-desc">notes and lists</div></div>
+        <button class="toggle on" id="tog-notes" onclick="toggleModule('notes')"></button>
+      </div>
+      <div class="sett-hint">at least one module must stay on</div>
     </div>
-    <div class="sett-row">
-      <div class="sett-row-info">
-        <div class="sett-row-name">Notes & To-do</div>
-        <div class="sett-row-desc">notes and lists</div>
-      </div>
-      <button class="toggle on" id="tog-notes" onclick="toggleModule('notes')"></button>
+
+    <div class="sett-block">
+      <div class="sett-block-label">font</div>
+      <div class="font-grid" id="fontGrid"></div>
     </div>
   </div>
 </div>
 
 <!-- ══════════ BOTTOM NAV ══════════ -->
 <nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-diary"   onclick="switchSection('diary')">
+  <button class="nav-btn active" id="nav-diary"    onclick="switchSection('diary')">
     <span class="nav-label">diary</span>
   </button>
-  <button class="nav-btn"        id="nav-tracker" onclick="switchSection('tracker')">
+  <button class="nav-btn"        id="nav-tracker"  onclick="switchSection('tracker')">
     <span class="nav-label">habits</span>
   </button>
-  <button class="nav-btn"        id="nav-notes"   onclick="switchSection('notes')">
+  <button class="nav-btn"        id="nav-notes"    onclick="switchSection('notes')">
     <span class="nav-label">notes</span>
   </button>
 </nav>
@@ -743,10 +817,37 @@ function setTheme(t,save=true){
 /* ════ MODULES ════ */
 let modules = {diary:true, tracker:true, notes:true};
 
-function toggleSettingsPanel(){
-  document.getElementById('settingsPanel').classList.toggle('open');
-  closeThemePanel();
+/* ════ FONTS ════ */
+const FONTS = [
+  {id:'lora',      label:'Lora',       display:'Lora, Georgia, serif',        mono:'Share Tech Mono, monospace', sample:'My Day'},
+  {id:'playfair',  label:'Playfair',   display:'Playfair Display, serif',      mono:'Space Mono, monospace',      sample:'My Day'},
+  {id:'syne',      label:'Syne',       display:'Syne, sans-serif',             mono:'Share Tech Mono, monospace', sample:'My Day'},
+  {id:'crimson',   label:'Crimson',    display:'Crimson Pro, Georgia, serif',  mono:'Share Tech Mono, monospace', sample:'My Day'},
+  {id:'inter',     label:'Inter',      display:'Inter, sans-serif',            mono:'Space Mono, monospace',      sample:'My Day'},
+  {id:'dmsans',    label:'DM Sans',    display:'DM Sans, sans-serif',          mono:'Share Tech Mono, monospace', sample:'My Day'},
+];
+let currentFont = 'lora';
+
+function applyFont(id, save=true){
+  currentFont = id;
+  const f = FONTS.find(f=>f.id===id) || FONTS[0];
+  document.documentElement.style.setProperty('--font-display', f.display);
+  document.documentElement.style.setProperty('--font-mono', f.mono);
+  document.querySelectorAll('.font-card').forEach(c=>c.classList.toggle('active', c.dataset.font===id));
+  if(save) persistSettings();
 }
+
+function renderFontGrid(){
+  const grid = document.getElementById('fontGrid');
+  if(!grid) return;
+  grid.innerHTML = FONTS.map(f=>`
+    <div class="font-card ${f.id===currentFont?'active':''}" data-font="${f.id}" onclick="applyFont('${f.id}')">
+      <div class="font-card-name" style="font-family:${f.display}">${f.sample}</div>
+      <div class="font-card-label">${f.label}</div>
+    </div>`).join('');
+}
+
+function toggleSettingsPanel(){} // legacy — now using nav
 
 function applyModules(save=true){
   const names=['diary','tracker','notes'];
@@ -779,9 +880,13 @@ function switchSection(name, save=true){
   currentSection=name;
   document.querySelectorAll('.app-section').forEach(s=>s.classList.toggle('active',s.id==='section-'+name));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.id==='nav-'+name));
+  // highlight gear when in settings
+  const gear=document.querySelector('.gear-btn');
+  if(gear) gear.style.color = name==='settings' ? 'var(--accent)' : '';
   if(name==='diary'&&document.getElementById('dtab-month').classList.contains('active'))renderCal();
   if(name==='tracker')renderHabits();
   if(name==='notes'){renderNotesList();renderLists();}
+  if(name==='settings') renderFontGrid();
   if(save) persistSettings();
 }
 
@@ -798,7 +903,7 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 /* ════ PERSIST SETTINGS ════ */
 function persistSettings(){
-  const s=JSON.stringify({theme:currentTheme,section:currentSection,subtitle:trackerSubtitle,modules});
+  const s=JSON.stringify({theme:currentTheme,section:currentSection,trackerNote,modules,font:currentFont});
   LS.set(CK_SETT,s);
   if(!isTG)return;
   clearTimeout(settTimer);
@@ -931,7 +1036,7 @@ function showDetail(entry,key){
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_S=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-let habits=[],trackerView='active',trackerSubtitle='';
+let habits=[],trackerView='active',trackerNote='';
 let hSaveTimer=null,pendingSave=false,savingCloud=false;
 
 function saveHabits(){
@@ -993,6 +1098,11 @@ function buildCal(h){
   return html+'</div>';
 }
 function renderHabits(){
+  // update date display
+  const d=new Date(),days=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const months=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const dd=document.getElementById('trackerDateDisplay');
+  if(dd)dd.textContent=`${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
   const c=document.getElementById('habitsContainer');
   const filtered=habits.filter(h=>trackerView==='active'?!h.archived:h.archived);
   if(!filtered.length){
@@ -1000,15 +1110,6 @@ function renderHabits(){
     c.innerHTML=`<div class="empty-state"><h3>${title}</h3><p>${desc}</p></div>`;return;
   }
   c.innerHTML=filtered.map(h=>`<div class="habit-card ${h.collapsed?'collapsed':''}"><div class="habit-top" onclick="toggleCollapse(${h.id})"><svg class="caret" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="habit-name">${h.name}</div><div class="card-btns"><button class="btn-arch" onclick="archiveHabit(${h.id},event)">${h.archived?'restore':'archive'}</button><button class="btn-del" onclick="deleteHabit(${h.id},event)">delete</button></div></div>${buildMini(h)}<div class="cal-wrap">${buildCal(h)}</div></div>`).join('');
-}
-function updateSubtitleEl(){const el=document.getElementById('subtitle');if(el)el.textContent=trackerSubtitle||'Just Do It';}
-function editSubtitle(){
-  const el=document.getElementById('subtitle'),inp=document.createElement('input');
-  inp.type='text';inp.value=el.textContent;inp.className='subtitle-input';inp.maxLength=100;
-  el.replaceWith(inp);inp.focus();inp.select();
-  function done(){const v=inp.value.trim(),nd=document.createElement('div');nd.id='subtitle';nd.className='subtitle';nd.textContent=v||'Just Do It';nd.onclick=editSubtitle;inp.replaceWith(nd);trackerSubtitle=v;saveHabits();}
-  inp.addEventListener('blur',done);
-  inp.addEventListener('keypress',e=>{if(e.key==='Enter')done();});
 }
 function shareMonth(habitId,month,year,e){e.stopPropagation();const h=habits.find(h=>h.id===habitId);if(h)genImage(h,month,year);}
 function genImage(habit,month,year){
@@ -1036,7 +1137,7 @@ function genImage(habit,month,year){
     ctx.font=`${done?600:400} 19px sans-serif`;ctx.fillStyle=done?btnFg:tx2;ctx.textAlign='center';ctx.fillText(dayNum,cx+cS/2,cy+cS/2+6);
   }
   y+=calH+28;
-  ctx.font=`italic 400 17px Georgia,serif`;ctx.fillStyle=tx2;ctx.textAlign='center';ctx.fillText(trackerSubtitle||'Just Do It',S/2,y);
+  ctx.font=`italic 400 17px Georgia,serif`;ctx.fillStyle=tx2;ctx.textAlign='center';ctx.fillText(trackerNote||'',S/2,y);
   const name=`${habit.name.replace(/[^a-zA-Z0-9]/g,'-')}-${MONTHS[month]}-${year}.png`;
   canvas.toBlob(async blob=>{
     if(!blob)return;
@@ -1059,21 +1160,34 @@ function persistNotes(){
 }
 
 /* markdown → html, clean and predictable */
-function renderMd(raw){
+function renderMd(raw, noteId){
   if(!raw)return'<p class="no-note-text">No content</p>';
   const lines=raw.split('\n');
   const out=[];
   let buf=[];
   const flushBuf=()=>{
     if(!buf.length)return;
-    out.push('<p>'+buf.join('<br>'+'')+'</p>');
+    out.push('<p>'+buf.join('<br>')+'</p>');
     buf=[];
   };
-  for(const raw_line of lines){
-    const line=raw_line;
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];
     if(line.startsWith('## ')){flushBuf();out.push(`<h2>${inl(line.slice(3))}</h2>`);continue;}
     if(line.startsWith('### ')){flushBuf();out.push(`<h3>${inl(line.slice(4))}</h3>`);continue;}
     if(line.match(/^-{3,}\s*$/)){flushBuf();out.push('<hr>');continue;}
+    // todo items
+    const todoMatch=line.match(/^- \[([ x])\] (.*)$/);
+    if(todoMatch){
+      flushBuf();
+      const done=todoMatch[1]==='x';
+      const text=esc(todoMatch[2]);
+      const nid=noteId||'';
+      out.push(`<div class="note-todo-item${done?' done':''}" onclick="toggleNoteTodo('${nid}',${i})">
+        <div class="note-todo-cb"></div>
+        <div class="note-todo-text">${text}</div>
+      </div>`);
+      continue;
+    }
     if(line.trim()===''){flushBuf();continue;}
     buf.push(inl(line));
   }
@@ -1088,22 +1202,70 @@ function inl(s){
     .replace(/(?<![a-zA-Z])_(.+?)_(?![a-zA-Z])/g,'<em>$1</em>');
 }
 
-function nTab(name){
+function toggleNoteTodo(noteId, lineIndex){
+  const n=notes.find(n=>n.id===noteId);if(!n)return;
+  const lines=n.body.split('\n');
+  const line=lines[lineIndex];
+  if(!line)return;
+  lines[lineIndex]=line.replace(/^- \[[ x]\]/,m=>m==='- [ ]'?'- [x]':'- [ ]');
+  n.body=lines.join('\n');
+  n.updatedAt=Date.now();
+  persistNotes();
+  // re-render view in place
+  document.getElementById('noteViewBody').innerHTML=renderMd(n.body,noteId);
+}
+
+function fmtTodo(){
+  const ta=document.getElementById('noteBody');
+  const start=ta.selectionStart,end=ta.selectionEnd;
+  const val=ta.value;
+  const lineStart=val.lastIndexOf('\n',start-1)+1;
+  const prefix='- [ ] ';
+  const line=val.slice(lineStart,end);
+  // wrap each selected line
+  const wrapped=line.split('\n').map(l=>l.startsWith('- [ ] ')||l.startsWith('- [x] ')?l:prefix+l).join('\n');
+  ta.value=val.slice(0,lineStart)+wrapped+val.slice(end);
+  ta.selectionStart=lineStart;
+  ta.selectionEnd=lineStart+wrapped.length;
+  ta.focus();
+}
   document.querySelectorAll('.n-tab').forEach(t=>t.classList.toggle('active',t.dataset.ntab===name));
   document.querySelectorAll('.n-section').forEach(s=>s.classList.toggle('active',s.id==='nsec-'+name));
   if(name==='notes')renderNotesList();
   if(name==='todo')renderLists();
 }
 
+let notesView='active';
+
+function setNotesView(v){
+  notesView=v;
+  document.getElementById('notesViewActive').classList.toggle('active',v==='active');
+  document.getElementById('notesViewArchive').classList.toggle('active',v==='archive');
+  renderNotesList();
+}
+
 function renderNotesList(){
   const list=document.getElementById('notesList');
-  const sorted=[...notes].sort((a,b)=>b.updatedAt-a.updatedAt);
-  if(!sorted.length){list.innerHTML=`<div class="empty-notes"><h3>No notes yet</h3><p>tap + new note to start</p></div>`;return;}
+  const filtered=notes.filter(n=>notesView==='archive'?n.archived:!n.archived);
+  const sorted=[...filtered].sort((a,b)=>b.updatedAt-a.updatedAt);
+  if(!sorted.length){
+    const msg=notesView==='archive'?'Archive is empty':'No notes yet';
+    const sub=notesView==='archive'?'Archived notes appear here':'tap + new to start';
+    list.innerHTML=`<div class="empty-notes"><h3>${msg}</h3><p>${sub}</p></div>`;return;
+  }
   list.innerHTML=sorted.map(n=>`<div class="note-card" onclick="openNote('${n.id}')">
     <div class="note-card-title">${esc(n.title||'Untitled')}</div>
-    <div class="note-card-preview">${esc(n.body.replace(/[#\-*_~]/g,'').slice(0,80))}</div>
+    <div class="note-card-preview">${esc(n.body.replace(/[#\-*_~\[\]]/g,'').slice(0,80))}</div>
     <div class="note-card-date">${fmtDate(n.updatedAt)}</div>
   </div>`).join('');
+}
+
+function archiveCurrentNote(){
+  const n=notes.find(n=>n.id===editingNoteId);if(!n)return;
+  n.archived=!n.archived;
+  persistNotes();
+  closeEditor();
+  renderNotesList();
 }
 
 function openNewNote(){
@@ -1122,9 +1284,9 @@ function openNewNote(){
 function openNote(id){
   const n=notes.find(n=>n.id===id);if(!n)return;
   editingNoteId=id;
-  // show view mode
   document.getElementById('noteViewTitle').textContent=n.title||'';
-  document.getElementById('noteViewBody').innerHTML=renderMd(n.body||'');
+  document.getElementById('noteViewBody').innerHTML=renderMd(n.body||'',id);
+  document.getElementById('archiveNoteBtn').textContent=n.archived?'unarchive':'archive';
   document.getElementById('viewMode').style.display='block';
   document.getElementById('editMode').style.display='none';
   document.getElementById('notesListView').classList.add('hidden');
@@ -1289,7 +1451,7 @@ saveBtn.disabled=true;saveBtn.textContent='loading…';
   let settRaw=null;
   if(isTG){try{settRaw=await cloudGet(CK_SETT);}catch{}}
   if(!settRaw)settRaw=LS.get(CK_SETT);
-  if(settRaw){try{const s=JSON.parse(settRaw);if(s.theme)currentTheme=s.theme;if(s.subtitle)trackerSubtitle=s.subtitle;if(s.section)currentSection=s.section;if(s.modules)modules=Object.assign(modules,s.modules);}catch{}}
+  if(settRaw){try{const s=JSON.parse(settRaw);if(s.theme)currentTheme=s.theme;if(s.trackerNote)trackerNote=s.trackerNote;if(s.section)currentSection=s.section;if(s.modules)modules=Object.assign(modules,s.modules);if(s.font)currentFont=s.font;}catch{}}
 
   // habits
   let habitsRaw=null;
@@ -1315,13 +1477,19 @@ saveBtn.disabled=true;saveBtn.textContent='loading…';
   if(listsRaw){try{lists=JSON.parse(listsRaw);}catch{}}
 
   setTheme(currentTheme,false);
+  applyFont(currentFont,false);
   applyDiaryColor(parseFloat(slider.value));
-  updateSubtitleEl();
   applyModules(false);
   switchSection(currentSection);
   renderHabits();
   renderNotesList();
   renderLists();
+  // wire tracker note
+  const tnEl=document.getElementById('trackerNote');
+  if(tnEl){
+    tnEl.value=trackerNote;
+    tnEl.addEventListener('input',()=>{trackerNote=tnEl.value;persistSettings();});
+  }
 
   diaryReady=true;
   saveBtn.disabled=false;
