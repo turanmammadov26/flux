@@ -17,8 +17,8 @@
   --done:#C8865A;--today-ring:#C8865A;--del:#D4685C;--arch:#8F9F72;--month-col:#C8865A;
   --muted:#A89E98;--glow:transparent;
   --T:0.35s cubic-bezier(0.4,0,0.2,1);
-  --font-display:'Lora',Georgia,serif;
-  --font-mono:'Share Tech Mono',monospace;
+  --font-display:Inter,sans-serif;
+  --font-mono:Inter,sans-serif;
 }
 [data-theme="ash"]     {--bg:#F0F2F5;--bg2:#E4E7EC;--surface:#FFF;--surface2:#EAEDF1;--border:rgba(0,0,0,0.07);--text:#1A1D23;--text2:#6B717D;--text3:#9BA3AF;--accent:#5B7CE6;--accent2:#4568D4;--btn-fg:#FFF;--done:#5B7CE6;--today-ring:#5B7CE6;--del:#E05C6A;--arch:#7AB8D0;--month-col:#5B7CE6;--muted:#9BA3AF;}
 [data-theme="midnight"]{--bg:#141414;--bg2:#1E1E1E;--surface:#242424;--surface2:#1A1A1A;--border:rgba(255,255,255,0.07);--text:#F0EDEA;--text2:#7A7875;--text3:#5A5855;--accent:#E8D5B0;--accent2:#D4BC90;--btn-fg:#1C1916;--done:#E8D5B0;--today-ring:#E8D5B0;--del:#C06060;--arch:#7A9A7A;--month-col:#E8D5B0;--muted:#7A7875;}
@@ -98,9 +98,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 }
 .gear-btn{
   background:none;border:1px solid var(--border);border-radius:8px;
-  color:var(--text3);font-size:14px;
-  width:32px;height:32px;cursor:pointer;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
+  color:var(--text3);font-family:var(--font-mono);font-size:9px;
+  letter-spacing:0.16em;text-transform:uppercase;
+  padding:6px 12px;cursor:pointer;flex-shrink:0;
   transition:background 0.2s,color 0.2s,border-color 0.2s;
 }
 .gear-btn:hover{background:var(--surface2);color:var(--text);}
@@ -547,7 +547,7 @@ textarea:focus{border-bottom-color:var(--accent);}
     <button class="theme-toggle-btn" onclick="toggleThemePanel()">
       <span class="t-dot"></span>theme
     </button>
-    <button class="gear-btn" onclick="switchSection('settings')" title="settings">⚙</button>
+    <button class="gear-btn" onclick="switchSection('settings')" title="settings">settings</button>
   </div>
 </div>
 
@@ -847,20 +847,20 @@ let modules = {diary:true, tracker:true, notes:true};
 
 /* ════ FONTS ════ */
 const FONTS = [
-  {id:'lora',      label:'Lora',       display:'Lora, Georgia, serif',        mono:'Share Tech Mono, monospace', sample:'My Day'},
-  {id:'playfair',  label:'Playfair',   display:'Playfair Display, serif',      mono:'Space Mono, monospace',      sample:'My Day'},
-  {id:'syne',      label:'Syne',       display:'Syne, sans-serif',             mono:'Share Tech Mono, monospace', sample:'My Day'},
-  {id:'crimson',   label:'Crimson',    display:'Crimson Pro, Georgia, serif',  mono:'Share Tech Mono, monospace', sample:'My Day'},
-  {id:'inter',     label:'Inter',      display:'Inter, sans-serif',            mono:'Space Mono, monospace',      sample:'My Day'},
-  {id:'dmsans',    label:'DM Sans',    display:'DM Sans, sans-serif',          mono:'Share Tech Mono, monospace', sample:'My Day'},
+  {id:'inter',     label:'Inter',     font:'Inter, sans-serif',              sample:'My Day'},
+  {id:'dmsans',    label:'DM Sans',   font:'DM Sans, sans-serif',            sample:'My Day'},
+  {id:'syne',      label:'Syne',      font:'Syne, sans-serif',               sample:'My Day'},
+  {id:'lora',      label:'Lora',      font:'Lora, Georgia, serif',           sample:'My Day'},
+  {id:'playfair',  label:'Playfair',  font:'Playfair Display, serif',        sample:'My Day'},
+  {id:'crimson',   label:'Crimson',   font:'Crimson Pro, Georgia, serif',    sample:'My Day'},
 ];
-let currentFont = 'lora';
+let currentFont = 'inter';
 
 function applyFont(id, save=true){
   currentFont = id;
   const f = FONTS.find(f=>f.id===id) || FONTS[0];
-  document.documentElement.style.setProperty('--font-display', f.display);
-  document.documentElement.style.setProperty('--font-mono', f.mono);
+  document.documentElement.style.setProperty('--font-display', f.font);
+  document.documentElement.style.setProperty('--font-mono', f.font);
   document.querySelectorAll('.font-card').forEach(c=>c.classList.toggle('active', c.dataset.font===id));
   if(save) persistSettings();
 }
@@ -870,7 +870,7 @@ function renderFontGrid(){
   if(!grid) return;
   grid.innerHTML = FONTS.map(f=>`
     <div class="font-card ${f.id===currentFont?'active':''}" data-font="${f.id}" onclick="applyFont('${f.id}')">
-      <div class="font-card-name" style="font-family:${f.display}">${f.sample}</div>
+      <div class="font-card-name" style="font-family:${f.font}">${f.sample}</div>
       <div class="font-card-label">${f.label}</div>
     </div>`).join('');
 }
