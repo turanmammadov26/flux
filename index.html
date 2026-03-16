@@ -223,6 +223,7 @@
 }
 .side-panel-overlay.visible{display:block;}
 
+/* ════ NAV LAYOUT ════ */
 .bottom-nav{
   flex-shrink:0;
   display:flex;align-items:stretch;
@@ -233,6 +234,7 @@
   border-top:1px solid var(--glass-border);
   padding-bottom:env(safe-area-inset-bottom,0px);
   transition:background var(--T);
+  position:relative;
 }
 .nav-pill{display:contents;}
 .nav-btn{
@@ -252,6 +254,15 @@
   color:var(--text3);transition:color 0.25s;
 }
 .nav-btn.active .nav-label{color:var(--accent);}
+
+/* ════ SIDE NAV (left) ════ */
+
+
+/* ════ ANDROID NAV BAR PADDING ════ */
+body.android-padding .bottom-nav{
+  padding-bottom:36px;
+}
+body.android-padding .bottom-nav::after{content:none;}
 
 .d-tabs,.n-tabs{
   display:flex;
@@ -1216,6 +1227,13 @@ textarea:focus{border-bottom-color:var(--accent);}
     </div>
 
     <div class="side-panel-divider"></div>
+    <div class="side-panel-label">navigation</div>
+    <div class="sp-toggle-row">
+      <span class="sp-toggle-name">android pad</span>
+      <button class="toggle" id="sp-tog-androidpad" onclick="toggleAndroidPad()"></button>
+    </div>
+
+    <div class="side-panel-divider"></div>
     <div class="side-panel-label">modules</div>
     <div class="sp-toggle-row">
       <span class="sp-toggle-name">diary</span>
@@ -1574,6 +1592,12 @@ const Storage={
 let currentTheme='default', currentSection='diary';
 
 /* ════ SIDE PANEL ════ */
+function toggleAndroidPad(){
+  const on=document.body.classList.toggle('android-padding');
+  document.getElementById('sp-tog-androidpad')?.classList.toggle('on',on);
+  persistSettings();
+}
+
 function toggleSidePanel(){
   const panel=document.getElementById('sidePanel');
   const overlay=document.getElementById('sidePanelOverlay');
@@ -1588,6 +1612,11 @@ function toggleSidePanel(){
       const t=document.getElementById('sp-tog-'+n);
       if(t) t.className='toggle'+(modules[n]?' on':'');
     });
+    // sync nav toggles
+    const leftTog=document.getElementById('sp-tog-leftnav');
+    if(leftTog) leftTog.className='toggle'+(document.body.classList.contains('nav-left')?' on':'');
+    const padTog=document.getElementById('sp-tog-androidpad');
+    if(padTog) padTog.className='toggle'+(document.body.classList.contains('android-padding')?' on':'');
     // render font list
     const fl=document.getElementById('spFontList');
     if(fl) fl.innerHTML=FONTS.map(f=>`
@@ -1716,7 +1745,8 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 /* ════ PERSIST SETTINGS ════ */
 function persistSettings(){
-  const s=JSON.stringify({theme:currentTheme,section:currentSection,trackerNote,modules,font:currentFont});
+  const androidPad=document.body.classList.contains('android-padding');
+  const s=JSON.stringify({theme:currentTheme,section:currentSection,trackerNote,modules,font:currentFont,androidPad});
   LS.set(CK_SETT,s);
   if(!isTG)return;
   clearTimeout(settTimer);
@@ -2793,7 +2823,7 @@ saveBtn.disabled=true;saveBtn.textContent='loading…';
   let settRaw=null;
   if(isTG){try{settRaw=await cloudGet(CK_SETT);}catch{}}
   if(!settRaw)settRaw=LS.get(CK_SETT);
-  if(settRaw){try{const s=JSON.parse(settRaw);if(s.theme)currentTheme=s.theme;if(s.trackerNote)trackerNote=s.trackerNote;if(s.section)currentSection=s.section;if(s.modules)modules=Object.assign(modules,s.modules);if(s.font)currentFont=s.font;}catch{}}
+  if(settRaw){try{const s=JSON.parse(settRaw);if(s.theme)currentTheme=s.theme;if(s.trackerNote)trackerNote=s.trackerNote;if(s.section)currentSection=s.section;if(s.modules)modules=Object.assign(modules,s.modules);if(s.font)currentFont=s.font;if(s.androidPad)document.body.classList.add('android-padding');}catch{}}
 
   // habits
   let habitsRaw=null;
