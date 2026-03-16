@@ -259,10 +259,13 @@
 
 
 /* ════ ANDROID NAV BAR PADDING ════ */
-body.android-padding .bottom-nav{
-  padding-bottom:36px;
+:root{--tg-bottom:0px;}
+.bottom-nav{
+  padding-bottom:var(--tg-bottom);
 }
-body.android-padding .bottom-nav::after{content:none;}
+body.android-padding .bottom-nav{
+  padding-bottom:calc(var(--tg-bottom) + 36px);
+}
 
 .d-tabs,.n-tabs{
   display:flex;
@@ -1545,23 +1548,17 @@ const isTG = !!(TG?.CloudStorage);
 /* ════ APPLY TG SAFE AREA ════ */
 function applyTGSafeArea(){
   if(!TG) return;
-  // contentSafeAreaInset — отступ под кнопками Telegram (Закрыть, ⋮)
   const ct = TG.contentSafeAreaInset || {};
   const sa = TG.safeAreaInset || {};
   const top = (ct.top || 0) + (sa.top || 0);
   const bottom = (ct.bottom || 0) + (sa.bottom || 0);
-  const left = (ct.left || 0) + (sa.left || 0);
-  const right = (ct.right || 0) + (sa.right || 0);
+
   if(top > 0){
     const header = document.querySelector('.app-header');
     if(header) header.style.paddingTop = (top + 6) + 'px';
   }
-  if(bottom > 0){
-    const nav = document.querySelector('.bottom-nav');
-    if(nav) nav.style.paddingBottom = (bottom + 6) + 'px';
-  }
-  if(left > 0) document.documentElement.style.setProperty('--safe-left', left+'px');
-  if(right > 0) document.documentElement.style.setProperty('--safe-right', right+'px');
+  // store bottom inset as CSS var — android-padding class adds on top
+  document.documentElement.style.setProperty('--tg-bottom', bottom + 'px');
 }
 
 // apply immediately and on viewport change
