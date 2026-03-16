@@ -1535,6 +1535,35 @@ textarea:focus{border-bottom-color:var(--accent);}
 </div><!-- /app-frame -->
 
 <script>
+
+/* ════ CONFIRM SHEET (replaces confirm()) ════ */
+function showConfirm(message, onConfirm){
+  const existing=document.getElementById('confirmSheet');
+  if(existing) existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='confirmSheet';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;display:flex;align-items:flex-end;justify-content:center;';
+  overlay.innerHTML=`
+    <div style="background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-bottom:none;border-radius:24px 24px 0 0;padding:24px 20px 32px;width:100%;max-width:560px;">
+      <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text);margin-bottom:20px;text-align:center;">${message}</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="document.getElementById('confirmSheet').remove()"
+          style="flex:1;padding:13px;border-radius:14px;border:1px solid var(--glass-border);background:none;font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text2);cursor:pointer;">
+          cancel
+        </button>
+        <button id="confirmOkBtn"
+          style="flex:1;padding:13px;border-radius:14px;border:none;background:var(--del);font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#fff;cursor:pointer;">
+          delete
+        </button>
+      </div>
+    </div>`;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
+  document.getElementById('confirmOkBtn').addEventListener('click',()=>{
+    overlay.remove();
+    onConfirm();
+  });
+}
 /* ════ TG ════ */
 const TG = window.Telegram?.WebApp;
 if(TG){
@@ -1550,18 +1579,10 @@ function applyTGSafeArea(){
   if(!TG) return;
   const ct = TG.contentSafeAreaInset || {};
   const sa = TG.safeAreaInset || {};
-  const top = (ct.top || 0) + (sa.top || 0);
   const bottom = (ct.bottom || 0) + (sa.bottom || 0);
-
-  if(top > 0){
-    const header = document.querySelector('.app-header');
-    if(header) header.style.paddingTop = (top + 6) + 'px';
-  }
-  // store bottom inset as CSS var — android-padding class adds on top
   document.documentElement.style.setProperty('--tg-bottom', bottom + 'px');
 }
 
-// apply immediately and on viewport change
 applyTGSafeArea();
 if(TG){
   TG.onEvent('viewportChanged', applyTGSafeArea);
@@ -1939,7 +1960,7 @@ async function flushHabits(){
   finally{savingCloud=false;if(pendingSave)flushHabits();}
 }
 function addHabit(){const inp=document.getElementById('habitInput'),name=inp.value.trim();if(!name)return;habits.push({id:Date.now(),name,completed:[],collapsed:false,archived:false});inp.value='';saveHabits();renderHabits();}
-function deleteHabit(id,e){e.stopPropagation();if(confirm('Delete this habit?')){habits=habits.filter(h=>h.id!==id);saveHabits();renderHabits();}}
+function deleteHabit(id,e){e.stopPropagation();showConfirm('Delete this habit?',()=>{habits=habits.filter(h=>h.id!==id);saveHabits();renderHabits();});}
 function archiveHabit(id,e){e.stopPropagation();const h=habits.find(h=>h.id===id);if(!h)return;h.archived=!h.archived;saveHabits();renderHabits();}
 function toggleCollapse(id){const h=habits.find(h=>h.id===id);if(!h)return;h.collapsed=!h.collapsed;saveHabits();renderHabits();}
 function toggleDay(id,str){const h=habits.find(h=>h.id===id);if(!h)return;const i=h.completed.indexOf(str);if(i>-1)h.completed.splice(i,1);else h.completed.push(str);saveHabits();renderHabits();}
@@ -2367,9 +2388,7 @@ function saveCurrentNote(){
 
 function deleteCurrentNote(){
   if(!editingNoteId||editingNoteId.startsWith('new_')){closeEditor();return;}
-  if(!confirm('Delete this note?'))return;
-  notes=notes.filter(n=>n.id!==editingNoteId);
-  persistNotes();closeEditor();
+  showConfirm('Delete this note?',()=>{notes=notes.filter(n=>n.id!==editingNoteId);persistNotes();closeEditor();});
 }
 
 function archiveCurrentNote(){
@@ -2468,13 +2487,10 @@ function closeListDetail(){
 function renameCurrentList(){const l=lists.find(l=>l.id===currentListId);if(!l)return;const v=document.getElementById('listDetailName').value.trim();if(v){l.name=v;persistLists();}}
 function deleteCurrentList(){
   if(!currentListId)return;
-  if(!confirm('Delete this list?'))return;
-  lists=lists.filter(l=>l.id!==currentListId);
-  persistLists();
-  closeListDetail();
+  showConfirm('Delete this list?',()=>{lists=lists.filter(l=>l.id!==currentListId);persistLists();closeListDetail();});
 }
 
-function deleteList(id){if(!confirm('Delete this list?'))return;lists=lists.filter(l=>l.id!==id);persistLists();renderLists();}
+function deleteList(id){showConfirm('Delete this list?',()=>{lists=lists.filter(l=>l.id!==id);persistLists();renderLists();});}
 function openNewListModal(){document.getElementById('newListName').value='';document.getElementById('newListModal').classList.add('show');setTimeout(()=>document.getElementById('newListName').focus(),200);}
 function closeModal(){document.getElementById('newListModal').classList.remove('show');}
 function closeModalOutside(e){if(e.target===document.getElementById('newListModal'))closeModal();}
