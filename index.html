@@ -1537,11 +1537,40 @@ const TG = window.Telegram?.WebApp;
 if(TG){
   TG.expand();
   TG.enableClosingConfirmation();
-  // request fullscreen if supported (Telegram 8.0+)
   if(typeof TG.requestFullscreen === 'function') TG.requestFullscreen();
   TG.ready();
 }
 const isTG = !!(TG?.CloudStorage);
+
+/* ════ APPLY TG SAFE AREA ════ */
+function applyTGSafeArea(){
+  if(!TG) return;
+  // contentSafeAreaInset — отступ под кнопками Telegram (Закрыть, ⋮)
+  const ct = TG.contentSafeAreaInset || {};
+  const sa = TG.safeAreaInset || {};
+  const top = (ct.top || 0) + (sa.top || 0);
+  const bottom = (ct.bottom || 0) + (sa.bottom || 0);
+  const left = (ct.left || 0) + (sa.left || 0);
+  const right = (ct.right || 0) + (sa.right || 0);
+  if(top > 0){
+    const header = document.querySelector('.app-header');
+    if(header) header.style.paddingTop = (top + 6) + 'px';
+  }
+  if(bottom > 0){
+    const nav = document.querySelector('.bottom-nav');
+    if(nav) nav.style.paddingBottom = (bottom + 6) + 'px';
+  }
+  if(left > 0) document.documentElement.style.setProperty('--safe-left', left+'px');
+  if(right > 0) document.documentElement.style.setProperty('--safe-right', right+'px');
+}
+
+// apply immediately and on viewport change
+applyTGSafeArea();
+if(TG){
+  TG.onEvent('viewportChanged', applyTGSafeArea);
+  TG.onEvent('safeAreaChanged', applyTGSafeArea);
+  TG.onEvent('contentSafeAreaChanged', applyTGSafeArea);
+}
 
 /* ════ STORAGE KEYS ════ */
 const CK_HABITS  = 'habits_v2';
