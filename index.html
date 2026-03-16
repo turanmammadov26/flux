@@ -1636,7 +1636,13 @@ function applyFont(id, save=true){
   const f = FONTS.find(f=>f.id===id) || FONTS[0];
   document.documentElement.style.setProperty('--font-display', f.font);
   document.documentElement.style.setProperty('--font-mono', f.font);
+  // update settings page font cards
   document.querySelectorAll('.font-card').forEach(c=>c.classList.toggle('active', c.dataset.font===id));
+  // update side panel font buttons
+  document.querySelectorAll('.sp-font-btn').forEach(b=>{
+    const isActive = b.getAttribute('onclick')?.includes(`'${id}'`);
+    b.classList.toggle('active', isActive);
+  });
   if(save) persistSettings();
 }
 
