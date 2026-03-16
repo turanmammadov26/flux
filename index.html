@@ -1579,7 +1579,14 @@ function applyTGSafeArea(){
   if(!TG) return;
   const ct = TG.contentSafeAreaInset || {};
   const sa = TG.safeAreaInset || {};
+  const top = (ct.top || 0) + (sa.top || 0);
   const bottom = (ct.bottom || 0) + (sa.bottom || 0);
+  // push header below Telegram buttons (Close, ⋮)
+  if(top > 0){
+    const header = document.querySelector('.app-header');
+    if(header) header.style.paddingTop = (top + 6) + 'px';
+  }
+  // bottom inset as CSS var — android-padding adds on top
   document.documentElement.style.setProperty('--tg-bottom', bottom + 'px');
 }
 
